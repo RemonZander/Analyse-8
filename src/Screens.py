@@ -1,7 +1,7 @@
 import secrets
 from time import sleep
 from screen import Screen
-from Types import Employee, Address, Member
+from Types import Cities, Employee, Address, Member
 from InputValidation import ValidateInput
 from datetime import date
 import datetime
@@ -283,7 +283,7 @@ class AddNewMemberScreen(Screen):
             
     def DoWork(self):
         self.Logger(self.LoggedInEmployee.Username, "entering add new member screen", "", "no")       
-        print("Fill in the information for a new memberL \n")
+        print("Fill in the information for a new member \n")
         newMember = Member()
         memberAddress = Address()
         newMember.Firstname = ValidateInput(self.LoggedInEmployee.Username, "adding firstname to new member", "Firstname: ", str, lambda x : re.match(r"^[A-Za-z\s'-]+$", x))
@@ -302,7 +302,17 @@ class AddNewMemberScreen(Screen):
         memberAddress.StreetName = ValidateInput(self.LoggedInEmployee.Username, "adding streetname to new member", "Streetname: ", str, lambda x : re.match(r"^[A-Za-z0-9\s,.'-\/]+$", x))
         memberAddress.HouseNumber = ValidateInput(self.LoggedInEmployee.Username, "adding housenumber to new member", "Housenumner: ", str, lambda x : re.match(r"^[A-Za-z0-9\s,.'-\/]+$", x))
         memberAddress.ZipCode = ValidateInput(self.LoggedInEmployee.Username, "adding zipcode to new member", "Zipcode (1212AB): ", str, lambda x : re.match(r"^\d{4}[A-Za-z]{2}$", x), 6).upper()
-        memberAddress.City = ValidateInput(self.LoggedInEmployee.Username, "adding city to new member", "City: ", str, lambda x : re.match(r"^[A-Za-z0-9\s,.'-\/]+$", x))
+        print("\n Choose a city:\n")
+
+        longest_city = len(max(Cities, key=lambda city: len(city.value)).value)       
+        print(self.RepeatString("#", longest_city + 9, ""))
+        index = 1        
+        for city in Cities:
+            print(self.RepeatString(" ", longest_city + 8, f"# [{index}] {city.value}") + "#")
+            index += 1            
+        print(self.RepeatString("#", longest_city + 9, ""))            
+              
+        memberAddress.City = ValidateInput(self.LoggedInEmployee.Username, "adding city to new member", "Make a choice: ", int, lambda x : x > 0 and x <= len(Cities) and re.match(r"^\d+$", str(x)), 2)
         newMember.Address = memberAddress
         currentYear = str(date.today().year)[-2:]
         UID = currentYear

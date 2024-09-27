@@ -1,7 +1,7 @@
 from Screens import LoginScreen, HomeScreen, AddSysAdminOrConsultantScreen, EditSysAdminOrConsultantScreen, AddNewMemberScreen, EditOrRemoveMember, ShowEmployees, ShowMembersScreen, ResetConsultantPassScreen, ResetSysAdminPassScreen, ReadLogsScreen, UpdatePasswordScreen, ManageBackups, SearchMemeberScreen
 import os
 def Main():             
-    #DB.SetupDatabase()
+    #DB.SetupDatabase()  
     screens = [
         LoginScreen(),                          #0
         HomeScreen(),                           #1

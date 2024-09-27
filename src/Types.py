@@ -1,3 +1,4 @@
+from enum import Enum
 class Employee(object):
     def __init__(self, ID = None, Firstname: str = None, Lastname: str = None, Role: str = None, Username: str = None, Password = None, IsTempPwd: int = None):
         self.ID = ID
@@ -25,4 +26,16 @@ class Member(object):
         self.Weight = Weight
         self.Address = Address
         self.Email = Email
-        self.PhoneNumber = PhoneNumber                                
+        self.PhoneNumber = PhoneNumber      
+
+class Cities(Enum):
+    Christchurch = "Christchurch"
+    Rotterdam = "Rotterdam"
+    Den_Haag = "Den Haag"
+    Utrecht = "Utrecht"   
+    Eindhoven = "Eindhoven"
+    Tilburg = "Tilburg"
+    Groningen = "Groningen"
+    Auckland = "Auckland"  
+    Los_Angeles = "Los_Angeles"
+    Wellington = "Wellington"                                            
