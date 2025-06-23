@@ -1,8 +1,18 @@
-from Screens import LoginScreen, HomeScreen, AddSysAdminOrServiceEngineerScreen, EditSysAdminOrServiceEngineerScreen, AddTravellerScreen, EditOrRemoveTraveller, ShowEmployees, ShowScootersScreen, ResetServiceEngineerScreen, ResetSysAdminPassScreen, ReadLogsScreen, UpdatePasswordScreen, ManageBackups, SearchScooterScreen, AddScooterScreen, EditOrRemoveScooter, SearchTraveller, ShowTraveller
 import os
 from time import sleep
-def Main():             
-    #DB.SetupDatabase()  
+
+from Screens import (AddScooterScreen, AddSysAdminOrServiceEngineerScreen,
+                     AddTravellerScreen, EditOrRemoveScooter,
+                     EditOrRemoveTraveller,
+                     EditSysAdminOrServiceEngineerScreen, HomeScreen,
+                     LoginScreen, ManageBackups, ReadLogsScreen,
+                     ResetServiceEngineerScreen, ResetSysAdminPassScreen,
+                     SearchScooterScreen, SearchTraveller, ShowEmployees,
+                     ShowScootersScreen, ShowTraveller, UpdatePasswordScreen)
+
+
+def Main():
+    #DB.SetupDatabase()
     screens = [
         LoginScreen(),                          #0
         HomeScreen(),                           #1

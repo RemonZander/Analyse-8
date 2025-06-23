@@ -1,14 +1,18 @@
-﻿from time import sleep
-from screen import Screen
-from Types import Traveller, Scooter, Employee, Traveller
-from InputValidation import InputValidator
+﻿import base64
 import datetime
-import bcrypt
+import getpass
 import logging
 import os
-import base64 
 import shutil
+from time import sleep
 from zipfile import ZipFile
+
+import bcrypt
+
+from InputValidation import InputValidator
+from screen import Screen
+from Types import Employee, Scooter, Traveller
+
 
 class LoginScreen(Screen):
     def __init__(self):
@@ -20,11 +24,13 @@ class LoginScreen(Screen):
         password = ""
         isLoggedIn = False
         tries = 0
+        super_admin_hash = "$2a$12$Y7hj3sZvun3x1y.eCsLVv.SycGQ0QkJe1NVlLzOBTCjucPYMO/PqK"
+
         while isLoggedIn == False and tries < 3:
             usernameInput = input("username: ")
             username = usernameInput if InputValidator.IsValidUsername(usernameInput) else ""
-            
-            password = input("password: ")
+
+            password = getpass.getpass("password: ")
             if (not InputValidator.IsValidPassword(password)):
                 print("Login Failed, try again...")
                 if (tries == 2):
@@ -34,7 +40,8 @@ class LoginScreen(Screen):
                 sleep(2)
                 tries += 1
                 continue
-            if (bcrypt.checkpw(password.encode('utf-8'), "$2b$12$1o2X5GFG17t5BRO/5uIQsO37.Fw.TcH5aa1Mr75FoKpjn4P2lUYxy".encode('utf-8')) and username == "super_admin"):
+            
+            if username == "super_admin" and bcrypt.checkpw(password.encode('utf-8'), super_admin_hash):
                 self.LoggedInEmployee.Role = "SuperAdmin"
                 self.LoggedInEmployee.Username = "super_admin"
                 isLoggedIn = True
@@ -219,14 +226,14 @@ class AddSysAdminOrServiceEngineerScreen(Screen):
             print("Fill in the information for the new Service Engineer:\n")
         newSysAdmin = Employee()
 
-        FirstNameInput = input("First Name : ")
+        FirstNameInput = input("First Name: ")
         if (not InputValidator.IsValidName(FirstNameInput)):
             print("Invalid first name. Please try again.")
             sleep(2)
             return 2
         newSysAdmin.Firstname = FirstNameInput
 
-        LastNameInput = input("Last Name : ")
+        LastNameInput = input("Last Name: ")
         if (not InputValidator.IsValidName(LastNameInput)):
             print("Invalid last name. Please try again.")
             sleep(2)
@@ -299,7 +306,7 @@ class EditSysAdminOrServiceEngineerScreen(Screen):
         if (choice2 == "1"):
             UpdatedEmployee = Employee()
             print(f"Current firstname: {self.encryptorDecryptor.Decrypt(employees[int(choice)][1])}")
-            FirstNameInput = input("First Name : ")
+            FirstNameInput = input("First Name: ")
             if (not InputValidator.IsValidName(FirstNameInput)):
                 print("Invalid first name. Please try again.")
                 sleep(2)
@@ -307,7 +314,7 @@ class EditSysAdminOrServiceEngineerScreen(Screen):
             UpdatedEmployee.Firstname = FirstNameInput
             
             print(f"Current lastname: {self.encryptorDecryptor.Decrypt(employees[int(choice)][2])}")
-            LastNameInput = input("Last Name : ")
+            LastNameInput = input("Last Name: ")
             if (not InputValidator.IsValidName(LastNameInput)):
                 print("Invalid last name. Please try again.")
                 sleep(2)
@@ -359,7 +366,7 @@ class ShowEmployees(Screen):
             print(f"| {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][1]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][2]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][3]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][4]))} |")
             print("-------------------------------------------------------------------------")
         print("\n")
-        print("Press [1] to return to home screen")
+        print("Press [1] to return to home screen: ")
         choice = input("Make a choice: ")
         if (not InputValidator.IsValidChoiceInput(choice, 2)): return 1
         return 1
@@ -374,7 +381,6 @@ class ShowScootersScreen(Screen):
         decryptedscooters: list[Scooter] = []
         for eSCO in encryptedscooters:
             tempScooter = Scooter(
-                self.encryptorDecryptor.Decrypt(eSCO[0]),
                 self.encryptorDecryptor.Decrypt(eSCO[1]),
                 self.encryptorDecryptor.Decrypt(eSCO[2]),
                 self.encryptorDecryptor.Decrypt(eSCO[3]),
@@ -388,20 +394,19 @@ class ShowScootersScreen(Screen):
                 self.encryptorDecryptor.Decrypt(eSCO[11]),
                 self.encryptorDecryptor.Decrypt(eSCO[12]),
                 self.encryptorDecryptor.Decrypt(eSCO[13]),
-                self.encryptorDecryptor.Decrypt(eSCO[14]),
-                self.encryptorDecryptor.Decrypt(eSCO[15])
+                self.encryptorDecryptor.Decrypt(eSCO[14])
                 )
             decryptedscooters.append(tempScooter)
 
         print("----------------------------------------------------------------------------------------------------------------------")
-        print(f"{self.RepeatString(' ', 25, 'brand')} | {self.RepeatString(' ', 25, 'model')} | {self.RepeatString(' ', 25, 'Serial number')} | {self.RepeatString(' ', 25, 'Top speed')} | {self.RepeatString(' ', 25, 'State of Charge')} | {self.RepeatString(' ', 25, 'Target-range SoC')} | {self.RepeatString(' ', 25, 'Location')} | {self.RepeatString(' ', 25, 'Out-of-service status')} | {self.RepeatString(' ', 25, 'Mileage')} | {self.RepeatString(' ', 25, 'Last maintenance date')} |")
+        print(f"{self.RepeatString(' ', 25, 'brand')} | {self.RepeatString(' ', 25, 'model')} | {self.RepeatString(' ', 25, 'Serial number')} | {self.RepeatString(' ', 25, 'Top speed')} | {self.RepeatString(' ', 25, 'Battery Capacity')} | {self.RepeatString(' ', 25, 'State of Charge')} | {self.RepeatString(' ', 25, 'Target-range SoC')} | {self.RepeatString(' ', 25, 'Location')} | {self.RepeatString(' ', 25, 'Out-of-service status')} | {self.RepeatString(' ', 25, 'Mileage')} | {self.RepeatString(' ', 25, 'Last maintenance date')} |")
         print("----------------------------------------------------------------------------------------------------------------------")
         for a in range(len(decryptedscooters)):
-            print(f"""{self.RepeatString(' ', 25, decryptedscooters[a][1])} | {self.RepeatString(' ', 25, decryptedscooters[a][2])} | {self.RepeatString(' ', 25, decryptedscooters[a][3])} | {self.RepeatString(' ', 25, decryptedscooters[a][4])} | {self.RepeatString(' ', 25, decryptedscooters[a][5])} | {self.RepeatString(' ', 25, decryptedscooters[a][6])} | {self.RepeatString(' ', 25, f"{decryptedscooters[a][7]}-{decryptedscooters[a][8]}")} | {self.RepeatString(' ', 25, f"{decryptedscooters[a][9]}-{decryptedscooters[a][10]}")}  | {self.RepeatString(' ', 25, decryptedscooters[a][11])} | {self.RepeatString(' ', 25, decryptedscooters[a][12])} | {self.RepeatString(' ', 25, decryptedscooters[a][13])} |""")
+            print(f"""{self.RepeatString(' ', 25, decryptedscooters[a].Brand)} | {self.RepeatString(' ', 25, decryptedscooters[a].Model)} | {self.RepeatString(' ', 25, decryptedscooters[a].SerialNumber)} | {self.RepeatString(' ', 25, decryptedscooters[a].TopSpeed)} | {self.RepeatString(' ', 25, decryptedscooters[a].BatteryCapacity)} | {self.RepeatString(' ', 25, decryptedscooters[a].StateOfCharge)} | {self.RepeatString(' ', 25, f"{decryptedscooters[a].TargetRangeMin}-{decryptedscooters[a].TargetRangeMax}")} | {self.RepeatString(' ', 25, f"{decryptedscooters[a].LocationLat}-{decryptedscooters[a].LocationLong}")}  | {self.RepeatString(' ', 25, decryptedscooters[a].OutOfService)} | {self.RepeatString(' ', 25, decryptedscooters[a].Mileage)} | {self.RepeatString(' ', 25, decryptedscooters[a].LastMaintenanceDate)} |""")
             print("----------------------------------------------------------------------------------------------------------------------------------------------------------")
 
         print("\n")
-        choice = input("Press [1] to return to home screen")
+        choice = input("Press [1] to return to home screen: ")
         if (not InputValidator.IsValidChoiceInput(choice, 1)): return 1
         return 1
 
@@ -496,7 +501,7 @@ class ReadLogsScreen(Screen):
                 except:
                     pass
         print("\n")
-        print("Press [1] to return to home screen")
+        print("Press [1] to return to home screen: ")
         choice = input("Make a choice: ")
         if (not InputValidator.IsValidChoiceInput(choice, 1)): return 1
         return 1
@@ -588,7 +593,7 @@ class ManageBackups(Screen):
                 print(f"| [{a}]{self.RepeatString(' ', 3, '')} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][1]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][2]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][3]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][4]))} |")
                 print("----------------------------------------------------------------------------------")
 
-            choice = input("Select a system admin to give access to use this backup or press enter to skip: ") #INPUT CHECKING!!!
+            choice = input("Select a system admin to give access to use this backup or press enter to skip: ")
             if (not InputValidator.IsValidChoiceInput(choice, len(employees) + 1)): return 10
 
             onetimecode = ""
@@ -614,7 +619,7 @@ class ManageBackups(Screen):
             backups = self.DB.GetAllBackups()
             for a in range(len(backups)):
                 print(f"[{a}] | Backup: {backups[a].BackupDate}")
-            choice = input("Make a choice: ")    #input checking!!!
+            choice = input("Make a choice: ")
             if (not InputValidator.IsValidChoiceInput(choice, len(backups)) ): return 10
             employees =  self.DB.GetAllSysAdmins()
             print("----------------------------------------------------------------------------------")
@@ -624,10 +629,10 @@ class ManageBackups(Screen):
                 print(f"| [{a}]{self.RepeatString(' ', 3, '')} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][1]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][2]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][3]))} | {self.RepeatString(' ', 15, self.encryptorDecryptor.Decrypt(employees[a][4]))} |")
                 print("----------------------------------------------------------------------------------")
 
-            choice = input("Select a system admin to give access to use this backup") #INPUT CHECKING!!!
+            choice = input("Select a system admin to give access to use this backup")
             if (not InputValidator.IsValidChoiceInput(choice, len(employees))): return 10
-            oneTimeCode = input("One time code: ")  #input checking!!!
-            if (not InputValidator.IsValidBackupCode(onetimecode)): 
+            oneTimeCode = input("One time code: ")
+            if (not InputValidator.IsValidBackupCode(oneTimeCode)):
                 print("Invalid one time code. Please try again.")
                 sleep(2)
                 return 10
@@ -647,7 +652,6 @@ class SearchScooterScreen(Screen):
         hits = []
         for eSCO in encryptedscooters:
             tempScooter = Scooter(
-                self.encryptorDecryptor.Decrypt(eSCO[0]),
                 self.encryptorDecryptor.Decrypt(eSCO[1]),
                 self.encryptorDecryptor.Decrypt(eSCO[2]),
                 self.encryptorDecryptor.Decrypt(eSCO[3]),
@@ -661,8 +665,7 @@ class SearchScooterScreen(Screen):
                 self.encryptorDecryptor.Decrypt(eSCO[11]),
                 self.encryptorDecryptor.Decrypt(eSCO[12]),
                 self.encryptorDecryptor.Decrypt(eSCO[13]),
-                self.encryptorDecryptor.Decrypt(eSCO[14]),
-                self.encryptorDecryptor.Decrypt(eSCO[15])
+                self.encryptorDecryptor.Decrypt(eSCO[14])
                 )
             decryptedscooters.append(tempScooter)
         
@@ -675,14 +678,14 @@ class SearchScooterScreen(Screen):
                 hits.append(dSCO)
 
         print("----------------------------------------------------------------------------------------------------------------------")
-        print(f"{self.RepeatString(' ', 25, 'brand')} | {self.RepeatString(' ', 25, 'model')} | {self.RepeatString(' ', 25, 'Serial number')} | {self.RepeatString(' ', 25, 'Top speed')} | {self.RepeatString(' ', 25, 'State of Charge')} | {self.RepeatString(' ', 25, 'Target-range SoC')} | {self.RepeatString(' ', 25, 'Location')} | {self.RepeatString(' ', 25, 'Out-of-service status')} | {self.RepeatString(' ', 25, 'Mileage')} | {self.RepeatString(' ', 25, 'Last maintenance date')} |")                    
+        print(f"{self.RepeatString(' ', 25, 'brand')} | {self.RepeatString(' ', 25, 'model')} | {self.RepeatString(' ', 25, 'Serial number')} | {self.RepeatString(' ', 25, 'Top speed')} | {self.RepeatString(' ', 25, 'Battery Capacity')} | {self.RepeatString(' ', 25, 'State of Charge')} | {self.RepeatString(' ', 25, 'Target-range SoC')} | {self.RepeatString(' ', 25, 'Location')} | {self.RepeatString(' ', 25, 'Out-of-service status')} | {self.RepeatString(' ', 25, 'Mileage')} | {self.RepeatString(' ', 25, 'Last maintenance date')} |")
         print("----------------------------------------------------------------------------------------------------------------------")
         for a in range(len(hits)):
-            print(f"""{self.RepeatString(' ', 25, hits[a][1])} | {self.RepeatString(' ', 25, hits[a][2])} | {self.RepeatString(' ', 25, hits[a][3])} | {self.RepeatString(' ', 25, hits[a][4])} | {self.RepeatString(' ', 25, hits[a][5])} | {self.RepeatString(' ', 25, hits[a][6])} | {self.RepeatString(' ', 25, hits[a][7]) + "-" + hits[a][8]} | {self.RepeatString(' ', 25, hits[a][9]) + " " + hits[a][10]} | {self.RepeatString(' ', 25, hits[a][11])} | {self.RepeatString(' ', 25, hits[a][12])} | {self.RepeatString(' ', 25, hits[a][13])} |""")
+            print(f"""{self.RepeatString(' ', 25, hits[a].Brand)} | {self.RepeatString(' ', 25, hits[a].Model)} | {self.RepeatString(' ', 25, hits[a].SerialNumber)} | {self.RepeatString(' ', 25, hits[a].TopSpeed)} | {self.RepeatString(' ', 25, hits[a].StateOfCharge)} | {self.RepeatString(' ', 25, f"{hits[a].TargetRangeMin}-{hits[a].TargetRangeMax}")} | {self.RepeatString(' ', 25, f"{hits[a].LocationLat}-{hits[a].LocationLong}")}  | {self.RepeatString(' ', 25, hits[a].OutOfService)} | {self.RepeatString(' ', 25, hits[a].Mileage)} | {self.RepeatString(' ', 25, hits[a].LastMaintenanceDate)} |""")
             print("----------------------------------------------------------------------------------------------------------------------------------------------------------")
 
         print("\n")
-        choice = input("Press [1] to return to home screen")
+        choice = input("Press [1] to return to home screen: ")
         if (not InputValidator.IsValidChoiceInput(choice, 1)): return 1
         return 1
 
@@ -706,12 +709,12 @@ class EditOrRemoveScooter(Screen):
         pass
 
     def DoWork(self):
-        self.Logger(self.LoggedInEmployee.Username, "entering edit or delete scooter screen", "", "no")        
+        self.Logger(self.LoggedInEmployee.Username, "entering edit or delete scooter screen", "", "no")
         encryptedscooters = self.DB.GetAllScooters()
         decryptedscooters = []
         for eSCO in encryptedscooters:
             tempScooter = Scooter(
-                self.encryptorDecryptor.Decrypt(eSCO[0]),
+                eSCO[0],
                 self.encryptorDecryptor.Decrypt(eSCO[1]),
                 self.encryptorDecryptor.Decrypt(eSCO[2]),
                 self.encryptorDecryptor.Decrypt(eSCO[3]),
@@ -725,19 +728,18 @@ class EditOrRemoveScooter(Screen):
                 self.encryptorDecryptor.Decrypt(eSCO[11]),
                 self.encryptorDecryptor.Decrypt(eSCO[12]),
                 self.encryptorDecryptor.Decrypt(eSCO[13]),
-                self.encryptorDecryptor.Decrypt(eSCO[14]),
-                self.encryptorDecryptor.Decrypt(eSCO[15])
+                self.encryptorDecryptor.Decrypt(eSCO[14])
                 )
             decryptedscooters.append(tempScooter)
 
         print("----------------------------------------------------------------------------------------------------------------------")
-        print(f"| option | {self.RepeatString(' ', 25, 'brand')} | {self.RepeatString(' ', 25, 'model')} | {self.RepeatString(' ', 25, 'Serial number')} | {self.RepeatString(' ', 25, 'Top speed')} | {self.RepeatString(' ', 25, 'State of Charge')} | {self.RepeatString(' ', 25, 'Target-range SoC')} | {self.RepeatString(' ', 25, 'Location')} | {self.RepeatString(' ', 25, 'Out-of-service status')} | {self.RepeatString(' ', 25, 'Mileage')} | {self.RepeatString(' ', 25, 'Last maintenance date')} |")                    
-        print("----------------------------------------------------------------------------------------------------------------------")        
+        print(f"{self.RepeatString(' ', 25, 'brand')} | {self.RepeatString(' ', 25, 'model')} | {self.RepeatString(' ', 25, 'Serial number')} | {self.RepeatString(' ', 25, 'Top speed')} | {self.RepeatString(' ', 25, 'Battery Capacity')} | {self.RepeatString(' ', 25, 'State of Charge')} | {self.RepeatString(' ', 25, 'Target-range SoC')} | {self.RepeatString(' ', 25, 'Location')} | {self.RepeatString(' ', 25, 'Out-of-service status')} | {self.RepeatString(' ', 25, 'Mileage')} | {self.RepeatString(' ', 25, 'Last maintenance date')} |")
+        print("----------------------------------------------------------------------------------------------------------------------")
         for a in range(len(decryptedscooters)):
-            print(f"""| [{a + 1}]{self.RepeatString(' ', 3, '')} | {self.RepeatString(' ', 25, decryptedscooters[a][1])} | {self.RepeatString(' ', 25, decryptedscooters[a][2])} | {self.RepeatString(' ', 25, decryptedscooters[a][3])} | {self.RepeatString(' ', 25, decryptedscooters[a][4])} | {self.RepeatString(' ', 25, decryptedscooters[a][5])} | {self.RepeatString(' ', 25, decryptedscooters[a][6])} | {self.RepeatString(' ', 25, decryptedscooters[a][7]) + "-" + decryptedscooters[a][8]} | {self.RepeatString(' ', 25, decryptedscooters[a][9]) + " " + decryptedscooters[a][10]} | {self.RepeatString(' ', 25, decryptedscooters[a][11])} | {self.RepeatString(' ', 25, decryptedscooters[a][12])} | {self.RepeatString(' ', 25, decryptedscooters[a][13])} |""")
+            print(f"""| [{a + 1}]{self.RepeatString(' ', 3, '')} | {self.RepeatString(' ', 25, decryptedscooters[a].Brand)} | {self.RepeatString(' ', 25, decryptedscooters[a].Model)} | {self.RepeatString(' ', 25, decryptedscooters[a].SerialNumber)} | {self.RepeatString(' ', 25, decryptedscooters[a].TopSpeed)} | {self.RepeatString(' ', 25, decryptedscooters[a].BatteryCapacity)} | {self.RepeatString(' ', 25, decryptedscooters[a].StateOfCharge)} | {self.RepeatString(' ', 25, f"{decryptedscooters[a].TargetRangeMin}-{decryptedscooters[a].TargetRangeMax}")} | {self.RepeatString(' ', 25, f"{decryptedscooters[a].LocationLat}-{decryptedscooters[a].LocationLong}")}  | {self.RepeatString(' ', 25, decryptedscooters[a].OutOfService)} | {self.RepeatString(' ', 25, decryptedscooters[a].Mileage)} | {self.RepeatString(' ', 25, decryptedscooters[a].LastMaintenanceDate)} |""")
             print("----------------------------------------------------------------------------------------------------------------------")
         choice = input("Choose a scooter: ")
-        if (not InputValidator.IsValidChoiceInput(choice, len(decryptedscooters + 1))): return 13
+        if (not InputValidator.IsValidChoiceInput(choice, len(decryptedscooters)+1)): return 13
         print("\n\n")
 
         choice2 = "1"
@@ -747,14 +749,15 @@ class EditOrRemoveScooter(Screen):
             choice2 = input("Make a choice: ")
         if (not InputValidator.IsValidChoiceInput(choice2, 2)): return 13
         if (choice2 == "2"):
-            self.DB.DeleteScooter(decryptedscooters[a - 1][0])
+            self.DB.DeleteScooter(decryptedscooters[int(choice) - 1].ID)
+            self.Logger(self.LoggedInEmployee.Username, f"removed scooter {decryptedscooters[int(choice) - 1].ID}", "", "no")
             print("removed scooter. Returning to homescreen")
             return 1
         print("Editing scooter")
         newScooter = Scooter()
-        newScooter.ID = decryptedscooters[choice - 1].ID
-        if (not self.AddOrEditScooter(newScooter, decryptedscooters[choice - 1])): return 13
-        self.DB.UpdateScooter(newScooter.ID)
+        newScooter.ID = decryptedscooters[int(choice) - 1].ID
+        if (not self.AddOrEditScooter(newScooter, decryptedscooters[int(choice) - 1])): return 13
+        self.DB.UpdateScooter(newScooter, newScooter.ID)
         print("Edited scooter. Returning to home screen...")
         self.Logger(self.LoggedInEmployee.Username, "Edited a scooter", "", "no")
         sleep(1)
@@ -780,12 +783,12 @@ class EditOrRemoveTraveller(Screen):
         pass
 
     def DoWork(self):
-        self.Logger(self.LoggedInEmployee.Username, "entering edit or delete traveller screen", "", "no")        
+        self.Logger(self.LoggedInEmployee.Username, "entering edit or delete traveller screen", "", "no")
         encryptedTravellers = self.DB.GetAllTravellers()
         decryptedTravellers = []
         for eTraveller in encryptedTravellers:
             tempTraveller = Traveller(
-                self.encryptorDecryptor.Decrypt(eTraveller[0]),
+                eTraveller[0],
                 self.encryptorDecryptor.Decrypt(eTraveller[1]),
                 self.encryptorDecryptor.Decrypt(eTraveller[2]),
                 self.encryptorDecryptor.Decrypt(eTraveller[3]),
@@ -797,19 +800,18 @@ class EditOrRemoveTraveller(Screen):
                 self.encryptorDecryptor.Decrypt(eTraveller[9]),
                 self.encryptorDecryptor.Decrypt(eTraveller[10]),
                 self.encryptorDecryptor.Decrypt(eTraveller[11]),
-                self.encryptorDecryptor.Decrypt(eTraveller[12]),
-                self.encryptorDecryptor.Decrypt(eTraveller[13])
+                self.encryptorDecryptor.Decrypt(eTraveller[12])
                 )
             decryptedTravellers.append(tempTraveller)
 
         print("----------------------------------------------------------------------------------------------------------------------")
         print(f"| option | {self.RepeatString(' ', 25, 'Firstname')} | {self.RepeatString(' ', 25, 'Lastname')} | {self.RepeatString(' ', 25, 'Birthday')} | {self.RepeatString(' ', 25, 'Gender')} | {self.RepeatString(' ', 25, 'Streetname')} | {self.RepeatString(' ', 25, 'House number')} | {self.RepeatString(' ', 25, 'Zipcode')} | {self.RepeatString(' ', 25, 'City')} | {self.RepeatString(' ', 25, 'Email')} | {self.RepeatString(' ', 25, 'Phone number')} | {self.RepeatString(' ', 25, 'Drivingslicence')} | {self.RepeatString(' ', 25, 'Registration date')} |")                    
-        print("----------------------------------------------------------------------------------------------------------------------")        
+        print("----------------------------------------------------------------------------------------------------------------------")
         for a in range(len(decryptedTravellers)):
-            print(f"| [{a + 1}]{self.RepeatString(' ', 3, '')} | {self.RepeatString(' ', 25, decryptedTravellers[a][1])} | {self.RepeatString(' ', 25, decryptedTravellers[a][2])} | {self.RepeatString(' ', 25, decryptedTravellers[a][3])} | {self.RepeatString(' ', 25, decryptedTravellers[a][4])} | {self.RepeatString(' ', 25, decryptedTravellers[a][5])} | {self.RepeatString(' ', 25, decryptedTravellers[a][6])} | {self.RepeatString(' ', 25, decryptedTravellers[a][7])} | {self.RepeatString(' ', 25, decryptedTravellers[a][8])} | {self.RepeatString(' ', 25, decryptedTravellers[a][9])} | {self.RepeatString(' ', 25, decryptedTravellers[a][10])} | {self.RepeatString(' ', 25, decryptedTravellers[a][11])} | {self.RepeatString(' ', 25, decryptedTravellers[a][12])} | {self.RepeatString(' ', 25, decryptedTravellers[a][13])} |")
+            print(f"| [{a + 1}]{self.RepeatString(' ', 3, '')} | {self.RepeatString(' ', 25, decryptedTravellers[a].Firstname)} | {self.RepeatString(' ', 25, decryptedTravellers[a].Lastname)} | {self.RepeatString(' ', 25, decryptedTravellers[a].Birthday)} | {self.RepeatString(' ', 25, decryptedTravellers[a].Gender)} | {self.RepeatString(' ', 25, decryptedTravellers[a].StreetName)} | {self.RepeatString(' ', 25, decryptedTravellers[a].HouseNumber)} | {self.RepeatString(' ', 25, decryptedTravellers[a].ZipCode)} | {self.RepeatString(' ', 25, decryptedTravellers[a].City)} | {self.RepeatString(' ', 25, decryptedTravellers[a].Email)} | {self.RepeatString(' ', 25, decryptedTravellers[a].PhoneNumber)} | {self.RepeatString(' ', 25, decryptedTravellers[a].DrivingLicenseNumber)} | {self.RepeatString(' ', 25, decryptedTravellers[a].RegistrationDate)} |")
             print("----------------------------------------------------------------------------------------------------------------------")
-        choice = input("Choose a scooter: ")
-        if (not InputValidator.IsValidChoiceInput(choice, len(decryptedTravellers + 1))): return 15
+        choice = input("Choose a Traveller: ")
+        if (not InputValidator.IsValidChoiceInput(choice, len(decryptedTravellers))): return 15
         print("\n\n")
 
         print("[1] edit traveller")
@@ -817,18 +819,22 @@ class EditOrRemoveTraveller(Screen):
         choice2 = input("Make a choice: ")
         if (not InputValidator.IsValidChoiceInput(choice2, 2)): return 15
         if (choice2 == "2"):
-            self.DB.DeleteTraveller(decryptedTravellers[a - 1][0])
+            self.DB.DeleteTraveller(decryptedTravellers[int(choice) - 1][0])
             print("removed traveller. Returning to homescreen")
-            self.Logger(self.LoggedInEmployee.Username, "removed traveller", "", "no")      
+            self.Logger(self.LoggedInEmployee.Username, "removed traveller", "", "no")
             sleep(1)
             return 1
         print("Editing traveller")
+        #newScooter.ID = decryptedscooters[int(choice) - 1].ID
+        #if (not self.AddOrEditScooter(newScooter, decryptedscooters[int(choice) - 1])): return 13
+        #self.DB.UpdateScooter(newScooter, newScooter.ID)
         newTraveller = Traveller()
-        newTraveller.ID = decryptedTravellers[choice - 1].ID
+        newTraveller.CustomerID = decryptedTravellers[int(choice) - 1].CustomerID
+        print(newTraveller.CustomerID)
         if (not self.AddOrEditTraveller(newTraveller)): return 15
-        self.DB.UpdateTraveller(newTraveller.ID)
+        self.DB.UpdateTraveller(newTraveller, newTraveller.CustomerID)
         print("Edited traveller. Returning to home screen...")
-        self.Logger(self.LoggedInEmployee.Username, "edited traveller", "", "no")      
+        self.Logger(self.LoggedInEmployee.Username, "edited traveller", "", "no")
         sleep(1)
         return 1
     
@@ -855,10 +861,7 @@ class SearchTraveller(Screen):
                 self.encryptorDecryptor.Decrypt(eSCO[9]),
                 self.encryptorDecryptor.Decrypt(eSCO[10]),
                 self.encryptorDecryptor.Decrypt(eSCO[11]),
-                self.encryptorDecryptor.Decrypt(eSCO[12]),
-                self.encryptorDecryptor.Decrypt(eSCO[13]),
-                self.encryptorDecryptor.Decrypt(eSCO[14]),
-                self.encryptorDecryptor.Decrypt(eSCO[15])
+                self.encryptorDecryptor.Decrypt(eSCO[12])
                 )
             decryptedTraveller.append(tempTravelller)
     
@@ -875,11 +878,11 @@ class SearchTraveller(Screen):
         print(f"{self.RepeatString(' ', 25, 'Firstname')} | {self.RepeatString(' ', 25, 'Lastname')} | {self.RepeatString(' ', 25, 'Birthday')} | {self.RepeatString(' ', 25, 'Gender')} | {self.RepeatString(' ', 25, 'StreetName')} | {self.RepeatString(' ', 25, 'HouseNumber')} | {self.RepeatString(' ', 25, 'ZipCode')} | {self.RepeatString(' ', 25, 'City')} | {self.RepeatString(' ', 25, 'Email')} | {self.RepeatString(' ', 25, 'PhoneNumber')} | {self.RepeatString(' ', 25, 'DrivingLicenseNumber')} |")                    
         print("----------------------------------------------------------------------------------------------------------------------")
         for a in range(len(hits)):
-            print(f"{self.RepeatString(' ', 25, hits[a][1])} | {self.RepeatString(' ', 25, hits[a][2])} | {self.RepeatString(' ', 25, hits[a][3])} | {self.RepeatString(' ', 25, hits[a][4])} | {self.RepeatString(' ', 25, hits[a][5])} | {self.RepeatString(' ', 25, hits[a][6])} | {self.RepeatString(' ', 25, hits[a][7])} | {self.RepeatString(' ', 25, hits[a][8])} | {self.RepeatString(' ', 25, hits[a][9])} | {self.RepeatString(' ', 25, hits[a][10])} | {self.RepeatString(' ', 25, hits[a][11])} | {self.RepeatString(' ', 25, hits[a][12])} |")
+            print(f"{self.RepeatString(' ', 25, hits[a].Firstname)} | {self.RepeatString(' ', 25, hits[a].Lastname)} | {self.RepeatString(' ', 25, hits[a].Birthday)} | {self.RepeatString(' ', 25, hits[a].Gender)} | {self.RepeatString(' ', 25, hits[a].StreetName)} | {self.RepeatString(' ', 25, hits[a].HouseNumber)} | {self.RepeatString(' ', 25, hits[a].ZipCode)} | {self.RepeatString(' ', 25, hits[a].City)} | {self.RepeatString(' ', 25, hits[a].Email)} | {self.RepeatString(' ', 25, hits[a].PhoneNumber)} | {self.RepeatString(' ', 25, hits[a].DrivingLicenseNumber)} |")
             print("----------------------------------------------------------------------------------------------------------------------------------------------------------")
 
         print("\n")
-        choice = input("Press [1] to return to home screen")
+        choice = input("Press [1] to return to home screen: ")
         if (not InputValidator.IsValidChoiceInput(choice, 1)): return 1
         return 1
     
@@ -888,7 +891,7 @@ class ShowTraveller(Screen):
         pass
 
     def DoWork(self):
-        self.Logger(self.LoggedInEmployee.Username, "entering show traveller screen", "", "no") 
+        self.Logger(self.LoggedInEmployee.Username, "entering show traveller screen", "", "no")
         encryptedTraveller = self.DB.GetAllTravellers()
         decryptedTraveller = []
         for eSCO in encryptedTraveller:
@@ -906,9 +909,6 @@ class ShowTraveller(Screen):
                 self.encryptorDecryptor.Decrypt(eSCO[10]),
                 self.encryptorDecryptor.Decrypt(eSCO[11]),
                 self.encryptorDecryptor.Decrypt(eSCO[12])
-                #self.encryptorDecryptor.Decrypt(eSCO[13]),
-                #self.encryptorDecryptor.Decrypt(eSCO[14]),
-                #self.encryptorDecryptor.Decrypt(eSCO[15])
                 )
             decryptedTraveller.append(tempTravelller)
 
@@ -916,10 +916,10 @@ class ShowTraveller(Screen):
         print(f"{self.RepeatString(' ', 25, 'Firstname')} | {self.RepeatString(' ', 25, 'Lastname')} | {self.RepeatString(' ', 25, 'Birthday')} | {self.RepeatString(' ', 25, 'Gender')} | {self.RepeatString(' ', 25, 'StreetName')} | {self.RepeatString(' ', 25, 'HouseNumber')} | {self.RepeatString(' ', 25, 'ZipCode')} | {self.RepeatString(' ', 25, 'City')} | {self.RepeatString(' ', 25, 'Email')} | {self.RepeatString(' ', 25, 'PhoneNumber')} | {self.RepeatString(' ', 25, 'DrivingLicenseNumber')} |")                    
         print("----------------------------------------------------------------------------------------------------------------------")
         for a in range(len(decryptedTraveller)):
-            print(f"{self.RepeatString(' ', 25, decryptedTraveller[a][1])} | {self.RepeatString(' ', 25, decryptedTraveller[a][2])} | {self.RepeatString(' ', 25, decryptedTraveller[a][3])} | {self.RepeatString(' ', 25, decryptedTraveller[a][4])} | {self.RepeatString(' ', 25, decryptedTraveller[a][5])} | {self.RepeatString(' ', 25, decryptedTraveller[a][6])} | {self.RepeatString(' ', 25, decryptedTraveller[a][7])} | {self.RepeatString(' ', 25, decryptedTraveller[a][8])} | {self.RepeatString(' ', 25, decryptedTraveller[a][9])} | {self.RepeatString(' ', 25, decryptedTraveller[a][10])} | {self.RepeatString(' ', 25, decryptedTraveller[a][11])} | {self.RepeatString(' ', 25, decryptedTraveller[a][12])} |")
+            print(f"{self.RepeatString(' ', 25, decryptedTraveller[a].Firstname)} | {self.RepeatString(' ', 25, decryptedTraveller[a].Lastname)} | {self.RepeatString(' ', 25, decryptedTraveller[a].Birthday)} | {self.RepeatString(' ', 25, decryptedTraveller[a].Gender)} | {self.RepeatString(' ', 25, decryptedTraveller[a].StreetName)} | {self.RepeatString(' ', 25, decryptedTraveller[a].HouseNumber)} | {self.RepeatString(' ', 25, decryptedTraveller[a].ZipCode)} | {self.RepeatString(' ', 25, decryptedTraveller[a].City)} | {self.RepeatString(' ', 25, decryptedTraveller[a].Email)} | {self.RepeatString(' ', 25, decryptedTraveller[a].PhoneNumber)} | {self.RepeatString(' ', 25, decryptedTraveller[a].DrivingLicenseNumber)} |")
             print("----------------------------------------------------------------------------------------------------------------------------------------------------------")
 
         print("\n")
-        choice = input("Press [1] to return to home screen")
+        choice = input("Press [1] to return to home screen: ")
         if (not InputValidator.IsValidChoiceInput(choice, 1)): return 1
         return 1

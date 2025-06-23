@@ -1,10 +1,11 @@
-from os import mkdir
 import os
-from cryptography.hazmat.primitives.asymmetric import rsa
+from os import mkdir
+
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+
+
 class EncryptorDecryptor(object):
     try:
         mkdir("./keys")
@@ -12,9 +13,9 @@ class EncryptorDecryptor(object):
         pass
     
     private_key = ""
-    public_key = ""      
+    public_key = ""
     
-    if (not os.path.isfile("./keys/private_key.pem")):       
+    if (not os.path.isfile("./keys/private_key.pem")):
         private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,

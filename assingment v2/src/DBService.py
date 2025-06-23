@@ -1,9 +1,12 @@
 import sqlite3
-from datetime import datetime
 import string
-from Types import Traveller, Scooter, Employee
-from EncryptionDecryption import EncryptorDecryptor
+from datetime import datetime
+
 import bcrypt
+
+from EncryptionDecryption import EncryptorDecryptor
+from Types import Employee, Scooter, Traveller
+
 
 class DBService:
     def __init__(self):
@@ -124,7 +127,7 @@ class DBService:
     def GetAllTravellers(self):
         return self.DBCursor.execute("SELECT * FROM Travellers").fetchall()
 
-    def UpdateTraveller(self, traveller: Traveller, CustomerID: str):
+    def UpdateTraveller(self, traveller: Traveller, CustomerID: int):
         self.DBCursor.execute("""
             UPDATE Travellers SET Firstname=?, Lastname=?, Birthday=?, Gender=?, StreetName=?, HouseNumber=?, ZipCode=?, City=?, Email=?, PhoneNumber=?, DrivingLicenseNumber=?
             WHERE CustomerID=?""",
@@ -143,7 +146,7 @@ class DBService:
         )
         self.connection.commit()
 
-    def DeleteTraveller(self, CustomerID: str):
+    def DeleteTraveller(self, CustomerID: int):
         self.DBCursor.execute("DELETE FROM Travellers WHERE CustomerID=?", (CustomerID,))
         self.connection.commit()
 
@@ -265,5 +268,9 @@ class DBService:
             if (self.encryptorDecryptor.Decrypt(em[4]) == username and bcrypt.checkpw(password.encode('utf-8'), em[5])):
                return [em]
 
+    def GetPassword(self, ID: int):
+        return self.DBCursor.execute("""SELECT Password FROM Employees WHERE ID = ?""", (ID,)).fetchall()   
+    def GetPassword(self, ID: int):
+        return self.DBCursor.execute("""SELECT Password FROM Employees WHERE ID = ?""", (ID,)).fetchall()   
     def GetPassword(self, ID: int):
         return self.DBCursor.execute("""SELECT Password FROM Employees WHERE ID = ?""", (ID,)).fetchall()   

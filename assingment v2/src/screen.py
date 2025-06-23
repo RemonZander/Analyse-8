@@ -1,17 +1,21 @@
-from os import mkdir
-from Types import Employee
-from DBService import DBService
-from time import sleep
-from Types import Traveller, Scooter, Employee, ScooterBrands, VespaModels, YamahaModels, HondaModels, SegwayNinebotModels, XiaomiModels, Cities
-from InputValidation import InputValidator
-import os
 import datetime
-from Logger import LogLevel
-from Logger import Logger
-from EncryptionDecryption import EncryptorDecryptor
-from cryptography.hazmat.primitives.asymmetric import rsa
+import os
+from os import mkdir
+from time import sleep
+
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
+from DBService import DBService
+from EncryptionDecryption import EncryptorDecryptor
+from InputValidation import InputValidator
+from Logger import Logger, LogLevel
+from Types import (Cities, Employee, HondaModels, Scooter, ScooterBrands,
+                   SegwayNinebotModels, Traveller, VespaModels, XiaomiModels,
+                   YamahaModels)
+
+
 class Screen(object):
      
     try:
@@ -49,19 +53,20 @@ class Screen(object):
                 index += 1
             print(self.RepeatString("#", longest_brand + 9, ""))
     
-            inputStr = input("Choose the brand")
+            inputStr = input("Choose the brand: ")
             if (not InputValidator.IsValidChoiceInput(inputStr, index)): return False
-            newScooter.Brand = ScooterBrands[inputStr - 1]
+            newScooter.Brand = list(ScooterBrands)[int(inputStr) - 1]
+            print(VespaModels)
     
             ModelList = []
-            match brand:
-                case 0:
+            match newScooter.Brand:
+                case ScooterBrands.Vespa:
                     ModelList = VespaModels
-                case 1:
+                case ScooterBrands.Yamaha:
                     ModelList = YamahaModels
-                case 2:
+                case ScooterBrands.Honda:
                     ModelList = HondaModels
-                case 3:
+                case ScooterBrands.SegwayNinebot:
                     ModelList = SegwayNinebotModels
                 case _:
                     ModelList = XiaomiModels
@@ -74,19 +79,20 @@ class Screen(object):
                 index += 1
             print(self.RepeatString("#", longest_model + 9, ""))
 
-            inputStr = input("Choose the model")
+            inputStr = input("Choose the model: ")
             if (not InputValidator.IsValidChoiceInput(inputStr, index)): return False
-            newScooter.Model = self.encryptorDecryptor.Encrypt(ModelList[inputStr - 1])
+            newScooter.Model = (list(ModelList)[int(inputStr) - 1])
+            #newTraveler.City = list(Cities)[int(inputStr) - 1]
 
             inputStr = input("Input the serie number (ahnumeric chars 10-17): ")
             if (not InputValidator.IsValidSerialNumber(inputStr)): return False
             newScooter.SerialNumber = inputStr
             inputStr = input("Topspeed of scooter: ")
             if (not InputValidator.IsValidNumber(inputStr)): return False
-            newScooter.TopSpeed = self.encryptorDecryptor.Encrypt(float(inputStr))
+            newScooter.TopSpeed = (float(inputStr))
             inputStr = input("Battery capacity of scooter: ")
             if (not InputValidator.IsValidNumber(inputStr)): return False
-            newScooter.BatteryCapacity = self.encryptorDecryptor.Encrypt(inputStr)
+            newScooter.BatteryCapacity = (inputStr)
         else:
             newScooter.Brand = oldScooter.Brand
             newScooter.Model = oldScooter.Model
@@ -96,29 +102,29 @@ class Screen(object):
         
         inputStr = input("State of Charge (SoC) of scooter: ")
         if (not InputValidator.IsValidPercentage(inputStr)): return False
-        newScooter.StateOfCharge = self.encryptorDecryptor.Encrypt(inputStr)
+        newScooter.StateOfCharge = (inputStr)
         inputStr = input("Max Target-range SoC of scooter: ")
         if (not InputValidator.IsValidPercentage(inputStr)): return False
-        newScooter.TargetRangeMax = self.encryptorDecryptor.Encrypt(inputStr)
+        newScooter.TargetRangeMax = (inputStr)
         inputStr = input("Min Target-range SoC of scooter: ")
         if (not InputValidator.IsValidPercentage(inputStr)): return False
-        newScooter.TargetRangeMin = self.encryptorDecryptor.Encrypt(inputStr)
+        newScooter.TargetRangeMin = (inputStr)
         inputStr = input("Latitude of scooter: ")
         if (not InputValidator.IsValidLatitude(inputStr)): return False
-        newScooter.LocationLat = self.encryptorDecryptor.Encrypt(float(inputStr))
+        newScooter.LocationLat = (float(inputStr))
         inputStr = input("Longitude of scooter: ")
         if (not InputValidator.IsValidLongitude(inputStr)): return False
-        newScooter.LocationLat = self.encryptorDecryptor.Encrypt(float(inputStr))
-        inputStr = input("Is scooter out of service (Y, yes, N no: ")
+        newScooter.LocationLat = (float(inputStr))
+        inputStr = input("Is scooter out of service (Y, yes, N no): ")
         if (not InputValidator.IsValidYesNo(inputStr)): return False
         if (inputStr.lower() == "yes" or inputStr.lower() == "y"): newScooter.OutOfService = True
-        else: newScooter.OutOfService = self.encryptorDecryptor.Encrypt(False)
+        else: newScooter.OutOfService = (False)
         inputStr = input("Milage of scooter: ")
         if (not InputValidator.IsValidNumber(inputStr)): return False
-        newScooter.Mileage = self.encryptorDecryptor.Encrypt(float(inputStr))
+        newScooter.Mileage = (float(inputStr))
         inputStr = input("Last maintenance date (YYYY-MM-DD): ")
         if (not InputValidator.IsValidDate(inputStr)): return False
-        newScooter.LastMaintenanceDate = self.encryptorDecryptor.Encrypt(inputStr)
+        newScooter.LastMaintenanceDate = inputStr
         return True
 
 
